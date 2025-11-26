@@ -1,4 +1,4 @@
-package com.example.note.spring.boot.app.model
+package com.example.note.spring.boot.app.database.model
 
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
