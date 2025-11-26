@@ -12,6 +12,7 @@ data class Note(
     val content: String,
     val color: Long,
     val createdAt: Instant,
-    //mongodb auto-increment id
+    val ownerId: ObjectId,
+    //mongodb primary auto-increment id
     @Id val id: ObjectId = ObjectId.get()
 )
