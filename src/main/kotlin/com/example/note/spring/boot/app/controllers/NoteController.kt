@@ -24,8 +24,6 @@ class NoteController(
         val title: String,
         val content: String,
         val color: Long,
-        //temp
-        val ownerId: OwnerId
     )
 
     //parse this model to json is handled by springboot framework
@@ -39,7 +37,9 @@ class NoteController(
 
     // handles POST request -> POST http://hostname/notes -> body {}
     @PostMapping
-    fun save(body: NoteRequest): NoteResponse {
+    fun save(
+        @RequestBody body: NoteRequest
+    ): NoteResponse {
         //usually there is created mapper but for simplicity
         val note = noteRepository.save<Note>(
             Note(
@@ -49,8 +49,8 @@ class NoteController(
                 content = body.content,
                 color = body.color,
                 createdAt = Instant.now(),
-                //temp
-                ownerId = ObjectId(body.ownerId)
+                //temp, each time new note is created for new user
+                ownerId = ObjectId()
             )
         )
 
