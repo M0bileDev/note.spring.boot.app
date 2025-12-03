@@ -64,6 +64,12 @@ class NoteController(
     ): List<NoteResponse> {
         return noteRepository.findByOwnerId(ownerId = ObjectId(ownerId)).map { it.toResponse() }
     }
+
+    // handles DELETE requests -> DELETE http://hostname/notes/123
+    @DeleteMapping(path = ["/{id}"])
+    fun deleteById(@PathVariable id: NoteId) {
+        noteRepository.deleteById(ObjectId(id))
+    }
 }
 
 private fun Note.toResponse(): NoteResponse =
