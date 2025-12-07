@@ -22,9 +22,13 @@ class JwtAuthFilter(
     ) {
 //      Bearer <token>
         val authHeader = request.getHeader(AUTHORIZATION)
-        if (authHeader == null || !authHeader.startsWith(STARTS_WITH_BEARER)) filterChain.doFilter(request, response)
+        if (authHeader == null || !authHeader.startsWith(STARTS_WITH_BEARER)) {
+            return filterChain.doFilter(request, response)
+        }
 
-        if (!jwtService.validateAccessToken(authHeader)) filterChain.doFilter(request, response)
+        if (!jwtService.validateAccessToken(authHeader)) {
+            return filterChain.doFilter(request, response)
+        }
 
         val ownerId = jwtService.getUserIdFromToken(authHeader)
         val auth = UsernamePasswordAuthenticationToken(ownerId, null)
