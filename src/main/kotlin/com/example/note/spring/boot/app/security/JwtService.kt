@@ -1,6 +1,7 @@
 package com.example.note.spring.boot.app.security
 
 import com.example.note.spring.boot.app.controllers.OwnerId
+import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
 import org.springframework.beans.factory.annotation.Value
@@ -9,6 +10,9 @@ import java.util.*
 
 typealias JwtSecret = String
 typealias Token = String
+
+const val TYPE = "type"
+const val STARTS_WITH_BEARER = "Bearer "
 
 @Service
 class JwtService(
@@ -40,7 +44,7 @@ class JwtService(
 //           owner of the token
             .subject(userId)
 //           additional info
-            .claim("type", type)
+            .claim(TYPE, type)
             .issuedAt(now)
             .expiration(expiryDate)
             .signWith(secretKey, Jwts.SIG.HS256)
@@ -54,5 +58,39 @@ class JwtService(
 
     fun generateRefreshToken(userId: OwnerId): Token {
         return generateJwtToken(userId, TokenType.REFRESH.name, refreshTokenValidityMs)
+    }
+
+    fun validateAccessToken(token: Token): Boolean {
+        val claims = parseAllClaims(token) ?: return false
+        val tokenType = claims[TYPE] as? String ?: return false
+        return tokenType == TokenType.ACCESS.name
+    }
+
+    fun validateRefreshToken(token: Token): Boolean {
+        val claims = parseAllClaims(token) ?: return false
+        val tokenType = claims[TYPE] as? String ?: return false
+        return tokenType == TokenType.REFRESH.name
+    }
+
+    fun getUserIdFromToken(token: Token): OwnerId {
+        val rawToken = if (token.startsWith(STARTS_WITH_BEARER)) {
+            token.removePrefix(STARTS_WITH_BEARER)
+        } else token
+        val claims = parseAllClaims(token) ?: throw IllegalStateException("Invalid token")
+        return claims.subject
+    }
+
+    private fun parseAllClaims(token: Token): Claims? {
+        return try {
+            Jwts.parser()
+//                Check if user changed some parts of the token
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .payload
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
     }
 }
