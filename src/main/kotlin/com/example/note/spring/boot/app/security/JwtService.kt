@@ -73,20 +73,20 @@ class JwtService(
     }
 
     fun getUserIdFromToken(token: Token): OwnerId {
-        val rawToken = if (token.startsWith(STARTS_WITH_BEARER)) {
-            token.removePrefix(STARTS_WITH_BEARER)
-        } else token
         val claims = parseAllClaims(token) ?: throw IllegalStateException("Invalid token")
         return claims.subject
     }
 
     private fun parseAllClaims(token: Token): Claims? {
+        val rawToken = if (token.startsWith(STARTS_WITH_BEARER)) {
+            token.removePrefix(STARTS_WITH_BEARER)
+        } else token
         return try {
             Jwts.parser()
 //                Check if user changed some parts of the token
                 .verifyWith(secretKey)
                 .build()
-                .parseSignedClaims(token)
+                .parseSignedClaims(rawToken)
                 .payload
         } catch (e: Exception) {
             e.printStackTrace()
