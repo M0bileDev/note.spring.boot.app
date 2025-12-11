@@ -1,11 +1,14 @@
 package com.example.note.spring.boot.app.security
 
+import com.example.note.spring.boot.app.database.model.RefreshToken
 import com.example.note.spring.boot.app.database.model.User
 import com.example.note.spring.boot.app.database.repository.RefreshTokenRepository
 import com.example.note.spring.boot.app.database.repository.UserRepository
+import org.bson.types.ObjectId
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.stereotype.Service
 import java.security.MessageDigest
+import java.time.Instant
 import java.util.*
 import javax.security.auth.login.CredentialException
 
@@ -45,6 +48,20 @@ class AuthService(
         return TokenPair(
             accessToken = newAccessToken,
             refreshToken = newRefreshToken
+        )
+    }
+
+    private fun storeRefreshToken(userId: ObjectId, rawRefreshToken: Token) {
+        val hashedToken = hashToken(rawRefreshToken)
+        val expiryMs = jwtService.refreshTokenValidityMs
+        val expiresAt = Instant.now().plusMillis(expiryMs)
+
+        refreshTokenRepository.save(
+            RefreshToken(
+                userId = userId,
+                expiresAt = expiresAt,
+                hashedToken = hashedToken
+            )
         )
     }
 
