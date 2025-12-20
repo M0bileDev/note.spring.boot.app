@@ -1,9 +1,8 @@
 package com.example.note.spring.boot.app.controllers
 
-import com.example.note.spring.boot.app.security.AuthService
-import com.example.note.spring.boot.app.security.Email
-import com.example.note.spring.boot.app.security.Password
-import com.example.note.spring.boot.app.security.Token
+import com.example.note.spring.boot.app.security.*
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -21,5 +20,12 @@ class AuthController(
     data class RefreshRequest(
         val refreshToken: Token
     )
+
+    @PostMapping("/register")
+    fun register(
+        @RequestBody body: AuthRequest
+    ) = with(body) {
+        authService.register(email, password)
+    }
 
 }
