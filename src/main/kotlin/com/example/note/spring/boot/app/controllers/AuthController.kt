@@ -34,4 +34,11 @@ class AuthController(
     ): TokenPair = with(body) {
         return authService.login(email, password)
     }
+
+    @PostMapping("/refresh")
+    fun refresh(
+        @RequestBody body: RefreshRequest
+    ): TokenPair = with(body) {
+        return authService.refresh(refreshToken)
+    }
 }
