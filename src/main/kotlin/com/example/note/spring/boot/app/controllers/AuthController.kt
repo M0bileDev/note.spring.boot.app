@@ -28,4 +28,10 @@ class AuthController(
         authService.register(email, password)
     }
 
+    @PostMapping("/login")
+    fun login(
+        @RequestBody body: AuthRequest
+    ): TokenPair = with(body) {
+        return authService.login(email, password)
+    }
 }
