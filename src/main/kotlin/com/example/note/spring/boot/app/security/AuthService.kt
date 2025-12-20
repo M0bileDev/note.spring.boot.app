@@ -45,6 +45,8 @@ class AuthService(
         val newAccessToken = jwtService.generateAccessToken(user.id.toHexString())
         val newRefreshToken = jwtService.generateRefreshToken(user.id.toHexString())
 
+        storeRefreshToken(user.id, newRefreshToken)
+
         return TokenPair(
             accessToken = newAccessToken,
             refreshToken = newRefreshToken
