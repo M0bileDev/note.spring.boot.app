@@ -7,6 +7,7 @@ import com.example.note.spring.boot.app.database.repository.UserRepository
 import org.bson.types.ObjectId
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.security.MessageDigest
 import java.time.Instant
 import java.util.*
@@ -46,6 +47,39 @@ class AuthService(
         val newRefreshToken = jwtService.generateRefreshToken(user.id.toHexString())
 
         storeRefreshToken(user.id, newRefreshToken)
+
+        return TokenPair(
+            accessToken = newAccessToken,
+            refreshToken = newRefreshToken
+        )
+    }
+
+    //all database actions must finish successful or nothing will be applied
+    @Transactional
+    fun refresh(refreshToken: Token) : TokenPair{
+        //the process is also called rotating the token
+
+        if(!jwtService.validateRefreshToken(refreshToken)){
+            throw IllegalArgumentException("Invalid refresh token")
+        }
+
+        val userId = jwtService.getUserIdFromToken(refreshToken)
+        val user = userRepository.findById(ObjectId(userId)).orElseThrow {
+            IllegalArgumentException("Invalid refresh token")
+        }
+        val hashed = hashToken(refreshToken)
+
+        // 1/2 database action
+        refreshTokenRepository.findByUserIdAndHashedToken(user.id, hashed) ?: throw IllegalArgumentException("Refresh token not recognized")
+
+//        Valid refresh token, and token also belongs to the user
+
+        // 2/2 database action
+        refreshTokenRepository.deleteByUserIdAndHashedToken(user.id, hashed)
+        val newAccessToken = jwtService.generateAccessToken(userId)
+        val newRefreshToken = jwtService.generateRefreshToken(userId)
+
+        storeRefreshToken(user.id, refreshToken)
 
         return TokenPair(
             accessToken = newAccessToken,
