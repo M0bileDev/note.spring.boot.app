@@ -41,6 +41,7 @@ class NoteController(
     fun save(
         @RequestBody body: NoteRequest
     ): NoteResponse {
+        val ownerId = SecurityContextHolder.getContext().authentication?.principal as String
         //usually there is created mapper but for simplicity
         val note = noteRepository.save<Note>(
             Note(
@@ -51,7 +52,7 @@ class NoteController(
                 color = body.color,
                 createdAt = Instant.now(),
                 //temp, each time new note is created for new user
-                ownerId = ObjectId()
+                ownerId = ObjectId(ownerId)
             )
         )
 
