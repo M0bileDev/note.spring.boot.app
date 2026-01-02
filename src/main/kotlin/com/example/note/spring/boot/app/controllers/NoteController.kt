@@ -4,6 +4,7 @@ import com.example.note.spring.boot.app.controllers.NoteController.NoteResponse
 import com.example.note.spring.boot.app.database.model.Note
 import com.example.note.spring.boot.app.database.repository.NoteRepository
 import org.bson.types.ObjectId
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import java.time.Instant
 
@@ -40,6 +41,7 @@ class NoteController(
     fun save(
         @RequestBody body: NoteRequest
     ): NoteResponse {
+        val ownerId = SecurityContextHolder.getContext().authentication?.principal as String
         //usually there is created mapper but for simplicity
         val note = noteRepository.save<Note>(
             Note(
@@ -50,7 +52,7 @@ class NoteController(
                 color = body.color,
                 createdAt = Instant.now(),
                 //temp, each time new note is created for new user
-                ownerId = ObjectId()
+                ownerId = ObjectId(ownerId)
             )
         )
 
@@ -59,16 +61,23 @@ class NoteController(
 
     // handles GET requests -> GET http://hostname/notes?ownerId=123
     @GetMapping
-    fun findOwnerById(
-        @RequestParam(required = true) ownerId: OwnerId
-    ): List<NoteResponse> {
+    fun findByOwnerId(): List<NoteResponse> {
+//        Actual user id attached to the token
+        val ownerId = SecurityContextHolder.getContext().authentication?.principal as String
         return noteRepository.findByOwnerId(ownerId = ObjectId(ownerId)).map { it.toResponse() }
     }
 
     // handles DELETE requests -> DELETE http://hostname/notes/123
     @DeleteMapping(path = ["/{id}"])
     fun deleteById(@PathVariable id: NoteId) {
-        noteRepository.deleteById(ObjectId(id))
+//        Note can be shared between multiple users by only owner of the note can delete it
+        val note = noteRepository.findById(ObjectId(id)).orElseThrow {
+            IllegalArgumentException("Note not found")
+        }
+        val ownerId = SecurityContextHolder.getContext().authentication?.principal as String
+        if (note.ownerId.toHexString() == ownerId) {
+            noteRepository.deleteById(ObjectId(id))
+        }
     }
 }
 
