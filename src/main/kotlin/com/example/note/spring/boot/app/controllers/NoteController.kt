@@ -69,7 +69,14 @@ class NoteController(
     // handles DELETE requests -> DELETE http://hostname/notes/123
     @DeleteMapping(path = ["/{id}"])
     fun deleteById(@PathVariable id: NoteId) {
-        noteRepository.deleteById(ObjectId(id))
+//        Note can be shared between multiple users by only owner of the note can delete it
+        val note = noteRepository.findById(ObjectId(id)).orElseThrow {
+            IllegalArgumentException("Note not found")
+        }
+        val ownerId = SecurityContextHolder.getContext().authentication?.principal as String
+        if (note.ownerId.toHexString() == ownerId) {
+            noteRepository.deleteById(ObjectId(id))
+        }
     }
 }
 
