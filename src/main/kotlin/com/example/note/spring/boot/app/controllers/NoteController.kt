@@ -4,6 +4,7 @@ import com.example.note.spring.boot.app.controllers.NoteController.NoteResponse
 import com.example.note.spring.boot.app.database.model.Note
 import com.example.note.spring.boot.app.database.repository.NoteRepository
 import org.bson.types.ObjectId
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import java.time.Instant
 
@@ -59,9 +60,9 @@ class NoteController(
 
     // handles GET requests -> GET http://hostname/notes?ownerId=123
     @GetMapping
-    fun findOwnerById(
-        @RequestParam(required = true) ownerId: OwnerId
-    ): List<NoteResponse> {
+    fun findByOwnerId(): List<NoteResponse> {
+//        Actual user id attached to the token
+        val ownerId = SecurityContextHolder.getContext().authentication?.principal as String
         return noteRepository.findByOwnerId(ownerId = ObjectId(ownerId)).map { it.toResponse() }
     }
 
