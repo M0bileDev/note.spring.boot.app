@@ -17,7 +17,7 @@ const val STARTS_WITH_BEARER = "Bearer "
 @Service
 class JwtService(
 //    Inject application property at runtime
-    @Value("JWT_SECRET") private val jwtSecret: JwtSecret
+    @Value("\${JWT_SECRET}") private val jwtSecret: JwtSecret
 ) {
 
     enum class TokenType {
@@ -25,7 +25,7 @@ class JwtService(
         REFRESH
     }
 
-    private val secretKey = Keys.hmacShaKeyFor(Base64.getDecoder().decode(jwtSecret))
+    private val secretKey = Keys.hmacShaKeyFor(jwtSecret.toByteArray())
 
     //                                      15 minutes      60 seconds  1 second
     private val accessTokenValidityMs = 15 * 60 * 1000L
