@@ -3,6 +3,7 @@ package com.example.note.spring.boot.app.controllers
 import com.example.note.spring.boot.app.controllers.NoteController.NoteResponse
 import com.example.note.spring.boot.app.database.model.Note
 import com.example.note.spring.boot.app.database.repository.NoteRepository
+import jakarta.validation.Valid
 import jakarta.validation.constraints.NotBlank
 import org.bson.types.ObjectId
 import org.springframework.security.core.context.SecurityContextHolder
@@ -23,7 +24,7 @@ class NoteController(
     //parse this model from json is handled by springboot framework
     data class NoteRequest(
         val id: NoteId?,
-        @NotBlank(message = "Title for the note is required.")
+        @field:NotBlank(message = "Title for the note is required.")
         val title: String,
         val content: String,
         val color: Long,
@@ -41,7 +42,7 @@ class NoteController(
     // handles POST request -> POST http://hostname/notes -> body {}
     @PostMapping
     fun save(
-        @RequestBody body: NoteRequest
+        @Valid @RequestBody body: NoteRequest
     ): NoteResponse {
         val ownerId = SecurityContextHolder.getContext().authentication?.principal as String
         //usually there is created mapper but for simplicity

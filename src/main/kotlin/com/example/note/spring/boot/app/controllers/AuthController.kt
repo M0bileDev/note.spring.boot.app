@@ -1,6 +1,7 @@
 package com.example.note.spring.boot.app.controllers
 
 import com.example.note.spring.boot.app.security.*
+import jakarta.validation.Valid
 import jakarta.validation.constraints.Pattern
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -30,7 +31,7 @@ class AuthController(
 
     @PostMapping("/register")
     fun register(
-        @RequestBody body: AuthRequest
+        @Valid @RequestBody body: AuthRequest
     ) = with(body) {
         authService.register(email, password)
     }
