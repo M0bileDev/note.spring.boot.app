@@ -8,10 +8,13 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.HttpStatusEntryPoint
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 
 // use this class to configure some parts of the app
 @Configuration
-class SecurityConfig {
+class SecurityConfig(
+    private val jwtAuthFilter: JwtAuthFilter
+) {
 
     //  httpSecurity -> security related functionality
     //  SecurityFilterChain -> processed internally by SpringBoot to apply
@@ -41,6 +44,9 @@ class SecurityConfig {
                 //if authentication fails, by default http status code will be 401
                 configure.authenticationEntryPoint(HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
             }
+            .addFilterBefore(
+                jwtAuthFilter, UsernamePasswordAuthenticationFilter::class.java
+            )
             .build()
     }
 }
