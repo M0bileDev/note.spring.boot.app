@@ -22,6 +22,7 @@ class NoteController(
     //parse this model from json is handled by springboot framework
     data class NoteRequest(
         val id: NoteId?,
+        @NotBlank(message = "Title for the note is required.")
         val title: String,
         val content: String,
         val color: Long,
