@@ -3,6 +3,7 @@ package com.example.note.spring.boot.app.controllers
 import com.example.note.spring.boot.app.controllers.NoteController.NoteResponse
 import com.example.note.spring.boot.app.database.model.Note
 import com.example.note.spring.boot.app.database.repository.NoteRepository
+import jakarta.validation.constraints.NotBlank
 import org.bson.types.ObjectId
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
