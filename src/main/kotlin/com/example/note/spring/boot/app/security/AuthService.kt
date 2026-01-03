@@ -5,6 +5,7 @@ import com.example.note.spring.boot.app.database.model.User
 import com.example.note.spring.boot.app.database.repository.RefreshTokenRepository
 import com.example.note.spring.boot.app.database.repository.UserRepository
 import org.bson.types.ObjectId
+import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.stereotype.Service
@@ -30,6 +31,11 @@ class AuthService(
     private val refreshTokenRepository: RefreshTokenRepository
 ) {
     fun register(email: Email, password: Password): User {
+        //prevent registration with email that already exists in database
+        val user = userRepository.findByEmail(email.trim())
+        if (user != null) {
+            throw ResponseStatusException(HttpStatus.CONFLICT, "A user with that email already exists.")
+        }
         return userRepository.save(
             User(
                 email = email,
