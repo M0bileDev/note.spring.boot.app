@@ -31,7 +31,7 @@ class JwtAuthFilter(
         }
 
         val ownerId = jwtService.getUserIdFromToken(authHeader)
-        val auth = UsernamePasswordAuthenticationToken(ownerId, null)
+        val auth = UsernamePasswordAuthenticationToken(ownerId, null, emptyList())
 //        Change global security context of SpringBoot -> global object that allow to retrieve
 //        authentication information of user anywhere in the project
         SecurityContextHolder.getContext().authentication = auth

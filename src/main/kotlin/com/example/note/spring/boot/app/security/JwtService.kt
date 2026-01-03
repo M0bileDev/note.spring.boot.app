@@ -5,7 +5,9 @@ import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.HttpStatusCode
 import org.springframework.stereotype.Service
+import org.springframework.web.server.ResponseStatusException
 import java.util.*
 
 typealias JwtSecret = String
@@ -17,7 +19,7 @@ const val STARTS_WITH_BEARER = "Bearer "
 @Service
 class JwtService(
 //    Inject application property at runtime
-    @Value("JWT_SECRET") private val jwtSecret: JwtSecret
+    @Value("\${JWT_SECRET}") private val jwtSecret: JwtSecret
 ) {
 
     enum class TokenType {
@@ -25,13 +27,13 @@ class JwtService(
         REFRESH
     }
 
-    private val secretKey = Keys.hmacShaKeyFor(Base64.getDecoder().decode(jwtSecret))
+    private val secretKey = Keys.hmacShaKeyFor(jwtSecret.toByteArray())
 
-    //                                      15 minutes      60 seconds  1 second
-    private val accessTokenValidityMs = 15 * 60 * 1000L
+    //                                  15 minutes      60 seconds  1 second
+    private val accessTokenValidityMs = 15              * 60        * 1000L
 
-    //                               30 days    24 hours    60 minutes  60 seconds  1 second
-    val refreshTokenValidityMs = 30 * 24 * 60 * 60 * 1000L
+    //                           30 days    24 hours    60 minutes  60 seconds  1 second
+    val refreshTokenValidityMs = 30         * 24        * 60        * 60        * 1000L
 
     private fun generateJwtToken(
         userId: OwnerId,
@@ -73,7 +75,7 @@ class JwtService(
     }
 
     fun getUserIdFromToken(token: Token): OwnerId {
-        val claims = parseAllClaims(token) ?: throw IllegalStateException("Invalid token")
+        val claims = parseAllClaims(token) ?: throw ResponseStatusException(HttpStatusCode.valueOf(401), "Refresh token not recognized.")
         return claims.subject
     }
 

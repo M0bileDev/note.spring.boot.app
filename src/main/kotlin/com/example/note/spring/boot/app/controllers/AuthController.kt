@@ -1,6 +1,8 @@
 package com.example.note.spring.boot.app.controllers
 
 import com.example.note.spring.boot.app.security.*
+import jakarta.validation.Valid
+import jakarta.validation.constraints.Pattern
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -13,7 +15,13 @@ class AuthController(
 ) {
 
     data class AuthRequest(
+        @field:jakarta.validation.constraints.Email(message = "Invalid email format.")
         val email: Email,
+        //at least  one lowercase, one uppercase, one digit and must be 9 characters long
+        @field:Pattern(
+            regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d). {9,}\$",
+            message = "Password must contains at least one lowercase, one uppercase, one digit and must be 9 characters long."
+        )
         val password: Password
     )
 
@@ -23,7 +31,7 @@ class AuthController(
 
     @PostMapping("/register")
     fun register(
-        @RequestBody body: AuthRequest
+        @Valid @RequestBody body: AuthRequest
     ) = with(body) {
         authService.register(email, password)
     }
